@@ -1,32 +1,33 @@
+// sensor.cpp — updated for Adafruit_VL53L0X
 #include "sensor.h"
 #include "config.h"
-// claude generated
 #include <Wire.h>
-#include <VL53L0X.h>   // Pololu VL53L0X library (install via Arduino Library Manager)
+#include <Adafruit_VL53L0X.h>  // Install: "Adafruit_VL53L0X" by Adafruit
 
-static VL53L0X sensor;
+static Adafruit_VL53L0X sensor;
 
 bool initSensor() {
   Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL);
-  sensor.setTimeout(500);
 
-  if (!sensor.init()) {
-    Serial.println("[SENSOR] ERROR: VL53L0X not found on I2C bus!");
+  if (!sensor.begin()) {
+    Serial.println("[SENSOR] ERROR: VL53L0X not found!");
     return false;
   }
 
-  // High speed mode: ~20ms timing budget (sufficient for this application)
-  sensor.setMeasurementTimingBudget(20000);
-  sensor.startContinuous();
-  Serial.println("[SENSOR] VL53L0X initialized OK.");
+  // High speed continuous mode — ~20ms per reading
+  sensor.startRangeContinuous(20);
+  Serial.println("[SENSOR] VL53L0X initialized OK (Adafruit library).");
   return true;
 }
 
 int readDistanceMM() {
-  uint16_t dist = sensor.readRangeContinuousMillimeters();
+  if (!sensor.isRangeComplete()) return -1;
 
-  if (sensor.timeoutOccurred() || dist >= 8190) {
-    return -1; // Out of range or error
-  }
-  return (int)dist;
+  VL53L0X_RangingMeasurementData_t measure;
+  sensor.getRangingMeasurement(&measure, false);
+
+  // RangeStatus 4 = phase failure (no object / out of range)
+  if (measure.RangeStatus == 4) return -1;
+
+  return (int)measure.RangeMilliMeter;
 }
