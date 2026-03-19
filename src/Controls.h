@@ -10,11 +10,11 @@
 #define JAW_MIN_ANGLE 0
 #define JAW_MAX_ANGLE 90
 
-#define NECK_TURN_DELAY 25
-#define NECK_STOP_DELAY 100
+#define NECK_TURN_DELAY 5
+#define NECK_STOP_DELAY 1000
 
-#define JAW_TURN_DELAY 25
-#define JAW_STOP_DELAY 25
+#define JAW_TURN_DELAY 5
+#define JAW_STOP_DELAY 100
 
 Servo neck;
 Servo jaw;
